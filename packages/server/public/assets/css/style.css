@@ -5,8 +5,31 @@ body {
     height: 100svh;
 }
 
-canvas {
+#game{
+    user-select: none;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#game canvas {
     display: block;
     width: 100%;
     height: 100%;
+}
+
+#game-overlay {
+    position: absolute;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.overlay-debug {
+    color: #FFF;
+    white-space: pre-wrap;
+    font-family: monospace;
+    padding: 1rem;
 }

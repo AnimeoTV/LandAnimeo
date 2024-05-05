@@ -1,4 +1,5 @@
 import { createApp }    from "vue";
 import App              from "./app.js";
+import Dash             from "./dash.js";
 
-createApp(App).mount("body");
+createApp(Dash).mount("body");

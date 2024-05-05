@@ -28,7 +28,7 @@ devDependencies:
     version: 0.4.4(rollup@4.17.1)
   '@rollup/plugin-typescript':
     specifier: ^11.1.6
-    version: 11.1.6(rollup@4.17.1)(typescript@5.4.5)
+    version: 11.1.6(rollup@4.17.1)(tslib@2.6.2)(typescript@5.4.5)
   '@vue/babel-plugin-jsx':
     specifier: ^1.2.2
     version: 1.2.2(@babel/core@7.24.4)
@@ -38,6 +38,9 @@ devDependencies:
   rollup-plugin-external-globals:
     specifier: ^0.10.0
     version: 0.10.0(rollup@4.17.1)
+  tslib:
+    specifier: ^2.6.2
+    version: 2.6.2
   typescript:
     specifier: ^5.4.5
     version: 5.4.5
@@ -511,7 +514,7 @@ packages:
       terser: 5.31.0
     dev: true
 
-  /@rollup/plugin-typescript@11.1.6(rollup@4.17.1)(typescript@5.4.5):
+  /@rollup/plugin-typescript@11.1.6(rollup@4.17.1)(tslib@2.6.2)(typescript@5.4.5):
     resolution: {integrity: sha512-R92yOmIACgYdJ7dJ97p4K69I8gg6IEHt8M7dUBxN3W6nrO8uUxX5ixl0yU/N3aZTi8WhPuICvOHXQvF6FaykAA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -527,6 +530,7 @@ packages:
       '@rollup/pluginutils': 5.1.0(rollup@4.17.1)
       resolve: 1.22.8
       rollup: 4.17.1
+      tslib: 2.6.2
       typescript: 5.4.5
     dev: true
 
@@ -1138,6 +1142,10 @@ packages:
   /to-fast-properties@2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}
     engines: {node: '>=4'}
+    dev: true
+
+  /tslib@2.6.2:
+    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
     dev: true
 
   /typescript@5.4.5:
