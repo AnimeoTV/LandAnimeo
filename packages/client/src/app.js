@@ -5,7 +5,7 @@ import {
     watch
 } from "vue";
 
-import { pSBC } from "./color.js";
+import { pSBC } from "./utils/color.js";
 
 import {
     createGameLoop,

@@ -12,15 +12,19 @@ import externalGlobals  from "rollup-plugin-external-globals";
 export default {
     input: "src/index.ts",
     output: {
-        format          : "es",
+        format          : "iife",
         dir             : "dist",
         entryFileNames  : () => "script.js",
         chunkFileNames  : "chunk-[name].js",
         sourcemap       : true,
+        globals: {
+            "vue": "Vue",
+        },
     },
     plugins: [
         typescript({
             outDir: "dist",
+            noForceEmit: true,
         }),
         babel({
             babelrc         : false,
@@ -38,18 +42,17 @@ export default {
                 "@babel/preset-typescript",
             ],
         }),
-        externalGlobals({
-            "vue"           : "Vue",
-            "vue-router"    : "VueRouter",
-        }),
         terser({
             compress: {
                 drop_debugger: false,
             },
         }),
+        externalGlobals({
+            "vue"           : "Vue",
+            "vue-router"    : "VueRouter",
+        }),
     ],
     external: [
         "vue",
-        "vue-router",
     ],
 };

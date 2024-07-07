@@ -1,13 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 body {
     background: #000;
     width: 100%;
     height: 100vh;
     height: 100svh;
+    font-family: "Montserrat";
 }
 
-#game{
+*  {
     user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+}
+
+#game {
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    isolation: isolate;
     position: relative;
+    user-select: none;
     width: 100%;
     height: 100%;
 }
@@ -25,6 +43,11 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
+    pointer-events: none;
+}
+
+#game-overlay > * {
+    pointer-events: visible;
 }
 
 .overlay-debug {
@@ -32,4 +55,82 @@ body {
     white-space: pre-wrap;
     font-family: monospace;
     padding: 1rem;
+}
+
+
+
+
+.game-overlay-menu {
+    transition: 1s linear;
+    transition-property: opacity, backdrop-filter;
+    opacity: 0;
+    color: #FFF;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    z-index: 500;
+}
+
+.game-overlay-center {
+    margin: auto;
+    text-align: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.game-overlay-credits {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    font-size: 1.15rem;
+}
+
+.game-overlay-menu-title {
+    font-size: 3rem;
+    font-weight: 900;
+}
+
+.game-overlay-menu-description {
+    font-size: 1.5rem;
+    margin-top: .5rem;
+}
+
+.game-overlay-menu-button {
+    background: #FFF;
+    color: #000;
+    font-weight: 900;
+    font-size: 1.5rem;
+    padding: .5rem;
+    border-radius: 5rem;
+    flex: 1 0 0;
+    cursor: pointer;
+    border: 2px solid gray;
+}
+
+.game-overlay-menu-buttons {
+    display: flex;
+    max-width: 100%;
+    width: 400px;
+    margin: auto;
+    margin-top: 2rem;
+}
+
+.game-overlay-menu-title img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    object-position: bottom;
+    margin-right: .5rem;
+}
+
+.game-music {
+    cursor: pointer;
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    font-size: 2.5rem;
 }

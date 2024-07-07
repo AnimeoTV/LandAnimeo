@@ -2,7 +2,7 @@ import { reactive, ref } from "vue";
 
 type GameLoopOptions = {
     ticksPerSeconds : number;
-    onGameStart     : () => void;
+    onGameStart     : () => Promise<void> | void;
     onUpdate        : () => void;
     onRender        : (partialTicks: number) => void;
 };
@@ -78,12 +78,12 @@ export function createGameLoop(options: GameLoopOptions) {
         refStarted.value = true;
 
         // Start game.
-        requestAnimationFrame((startMs) => {
+        requestAnimationFrame(async (startMs) => {
             let timeDelta   = 0;
             let prevMs      = startMs;
 
             // Start game.
-            options.onGameStart();
+            await options.onGameStart();
 
             // Start game loop.
             requestAnimationFrame(function gameLoop(ms) {
@@ -117,7 +117,7 @@ export function createGameLoop(options: GameLoopOptions) {
 }
 
 export function startHighPrecisionTimer(cb: () => void, delay: number): () => void {
-    let tid: NodeJS.Timeout | undefined;
+    let tid: number | undefined;
     let lastTime = performance.now();
 
     function getNext() {
