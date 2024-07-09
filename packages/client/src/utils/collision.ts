@@ -19,8 +19,8 @@ export type Square = {
 };
 
 export function detectOverlap(square1: Square, square2: Square): boolean {
-    if ((square1.x + square1.width) >= square2.x && square1.x <= (square2.x + square2.width))
-        if ((square1.y + square1.height) >= square2.y && square1.y <= (square2.y + square2.height))
+    if ((square1.x + square1.width) > square2.x && square1.x < (square2.x + square2.width))
+        if ((square1.y + square1.height) > square2.y && square1.y < (square2.y + square2.height))
             return true;
 
     return false;
@@ -30,16 +30,16 @@ export function detectCollision(square1: Square, square2: Square): Side[] {
     const sides: Side[] = [];
 
     if (detectOverlap(square1, square2)) {
-        if ((square1.x + square1.width) >= square2.x && square1.x <= square2.x)
+        if ((square1.x + square1.width) > square2.x && square1.x < square2.x)
             sides.push("right");
 
-        if (square1.x <= (square2.x + square2.width) && (square1.x + square1.width) >= (square2.x + square2.width))
+        if (square1.x < (square2.x + square2.width) && (square1.x + square1.width) > (square2.x + square2.width))
             sides.push("left");
 
-        if ((square1.y + square1.height) >= square2.y && square1.y <= square2.y)
+        if ((square1.y + square1.height) > square2.y && square1.y < square2.y)
             sides.push("bottom");
 
-        if (square1.y <= (square2.y + square2.height) && (square1.y + square1.height) >= (square2.y + square2.height))
+        if (square1.y < (square2.y + square2.height) && (square1.y + square1.height) > (square2.y + square2.height))
             sides.push("top");
     }
 

@@ -17,7 +17,7 @@ import {
 import Pause                            from "./components/pause.js";
 import Main                             from "./components/main.js";
 import Loading                          from "./components/loading.js";
-import { Block, detectCollision }       from "./utils/collision.js";
+import { Block, detectOverlap }         from "./utils/collision.js";
 import { isColor }                      from "./utils/color.js";
 import { createImageDataProcessor }     from "./utils/pixelmap.js";
 import GameOverlay                      from "./components/gui.js";
@@ -113,6 +113,15 @@ function createGame() {
             gravity         = -2.0;
         }
     }
+
+    (window as any).teleport = (options: any) => {
+        myPlayer.x      = options.x;
+        myPlayer.y      = options.y;
+        myPlayer.prevX  = myPlayer.x;
+        myPlayer.prevY  = myPlayer.y;
+        myPlayer.velX = 0;
+        myPlayer.velY = 0;
+    };
 
     const refAudioContext = ref<AudioContext>();
 
@@ -264,6 +273,8 @@ function createGame() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         if (myPlayer) {
+            const myX = myPlayer.prevX + ((myPlayer.x - myPlayer.prevX) * partialTick);
+            const myY = myPlayer.prevY + ((myPlayer.y - myPlayer.prevY) * partialTick);
 
             // Setup camera (center to player).
             const cameraMatrix = setupCamera(partialTick);
@@ -271,7 +282,7 @@ function createGame() {
             // Render map
             {
                 ctx.translate(
-                    ((myPlayer.prevX + ((myPlayer.x - myPlayer.prevX) * partialTick)) / 12),
+                    myX / 12,
                     0,
                 );
 
@@ -296,24 +307,26 @@ function createGame() {
                     ctx.stroke();
                 }
 
+                const myLoc = {
+                    x       : (myPlayer.x + myPlayer.velX) / CellSize,
+                    y       : (myPlayer.y + myPlayer.velY) / CellSize,
+                    width   : 1,
+                    height  : 1,
+                };
+
                 for (const block of map) {
                     const { x, y, r, g, b, a } = block;
 
                     ctx.setTransform(cameraMatrix);
 
-                    const sides = detectCollision({
-                        x       : myPlayer.x / CellSize,
-                        y       : myPlayer.y / CellSize,
-                        width   : 1,
-                        height  : 1,
-                    }, {
+                    const isOverlapping = detectOverlap(myLoc, {
                         x,
                         y,
                         width   : 1,
                         height  : 1,
                     });
 
-                    if (stats.debugMode && sides.length) {
+                    if (stats.debugMode && isOverlapping) {
                         ctx.fillStyle = "red";
                         ctx.fillRect((x * CellSize), (y * CellSize), CellSize, CellSize);
 
@@ -344,6 +357,7 @@ function createGame() {
                                     ctx.rotate(Math.PI / 2);
                                     break;
                             }
+
                             ctx.translate(-(CellSize / 2), -(CellSize / 2));
 
                             const objectMatrix = ctx.getTransform();
@@ -397,11 +411,7 @@ function createGame() {
                 const objectMatrix = ctx.getTransform();
 
                 ctx.setTransform(cameraMatrix);
-
-                ctx.translate(
-                    myPlayer.prevX + ((myPlayer.x - myPlayer.prevX) * partialTick),
-                    myPlayer.prevY + ((myPlayer.y - myPlayer.prevY) * partialTick),
-                );
+                ctx.translate(myX, myY);
 
                 if (stats.debugMode) {
                     ctx.strokeStyle = "red";
@@ -420,17 +430,26 @@ function createGame() {
     function onUpdate() {
         stats.tps++;
 
+        if (inputs.has("Escape"))
+            respawnPlayer();
+
+        if (myPlayer.y <= 0)
+            myPlayer.y = 0;
+
         myPlayer.prevX = myPlayer.x;
         myPlayer.prevY = myPlayer.y;
 
-        myPlayer.x += myPlayer.velX;
-        myPlayer.y += myPlayer.velY;
-
         function isColliding() {
-            if (myPlayer.y <= 0) {
-                myPlayer.y = 0;
-                return true;
-            }
+            const myX   = (myPlayer.x + myPlayer.velX) / CellSize;
+            const myY   = (myPlayer.y + myPlayer.velY) / CellSize;
+            const myLoc = {
+                x       : myX,
+                y       : myY,
+                width   : 1,
+                height  : 1,
+            };
+
+            const collidedBlocks = [];
 
             for (const block of map) {
                 const { x, y } = block
@@ -439,115 +458,83 @@ function createGame() {
                 if (isColor(block, 163, 73, 164) || isColor(block, 0, 162, 232) || isColor(block, 158, 75, 164) || isColor(block, 59, 162, 231))
                     continue;
 
-                const sides = detectCollision({
-                    x       : myPlayer.x / CellSize,
-                    y       : myPlayer.y / CellSize,
-                    width   : 1,
-                    height  : 1,
-                }, {
+                const isOverlapping = detectOverlap(myLoc, {
                     x,
                     y,
                     width   : 1,
                     height  : 1,
                 });
 
-                if (sides.length) {
-                    if (!isColor(block, 255, 242, 0)) {
-                        if (sides.includes("top")) {
-                            myPlayer.y = (y + 1) * CellSize;
-
-                        } else if (sides.includes("bottom")) {
-                            myPlayer.y = (y - 1) * CellSize;
-                        }
-                    }
-
-                    // if (sides.includes("left")) {
-                    //     myPlayer.x = (x - 1) * CellSize;
-
-                    // } else if (sides.includes("right")) {
-                    //     myPlayer.x = (x + 1) * CellSize;
-                    // }
-
-                    return block;
-                }
-
-                // // Collide top (roof).
-                // {
-                //     const playerCellX = (myPlayer.x / CellSize) + 1;
-                //     const playerCellY = (myPlayer.y / CellSize) + 1;
-
-                //     if (playerCellX >= x && playerCellX <= (x + 1)) {
-                //         if (playerCellY >= y && playerCellY <= (y + 1)) {
-                //             return block;
-                //         }
-                //     }
-                // }
-
-                // // Collide bottom (ground).
-                // {
-                //     const playerCellX = (myPlayer.x / CellSize);
-                //     const playerCellY = (myPlayer.y / CellSize);
-
-                //     if (playerCellX >= x && playerCellX <= (x + 1)) {
-                //         if (playerCellY >= y && playerCellY <= (y + 1)) {
-                //             myPlayer.y = (y + 1) * CellSize;
-                //             return block;
-                //         }
-                //     }
-                // }
+                if (isOverlapping)
+                    collidedBlocks.push(block);
             }
 
-            return false;
+            return collidedBlocks;
         }
 
-        const collided = isColliding();
+        const myRealY           = (myPlayer.y / CellSize);
+        const collidedBlocks    = isColliding();
+        let isOnGround          = false;
 
-        if (collided) {
-            if (typeof collided !== "boolean" && isColor(collided, 255, 242, 0)) {
+        for (const collided of collidedBlocks) {
+
+            // Detect gravity switch.
+            if (isColor(collided, 255, 127, 39) || isColor(collided, 245, 128, 50)) {
+                gravity *= -1;
+                myPlayer.velY = 0;
+                console.log("BOOM SWITCH !");
+                return;
+            }
+
+            // Detect next level.
+            if (isColor(collided, 34, 177, 76)) {
+                levelIdx++;
+                respawnPlayer();
+                return;
+            }
+
+            if (isColor(collided, 255, 201, 14)) {
+                console.log("UELLOW.");
+                return;
+            }
+
+            if (gravity < 0) {
+                if (myRealY > collided.y) {
+                    console.log("IS ON GROUND (1).", myPlayer.y);
+                    myPlayer.y      = ((collided.y + 1) * CellSize);
+                    myPlayer.velY   = 0;
+                    isOnGround      = true;
+                    continue;
+                }
 
             } else {
-                myPlayer.velY = 0;
-
-                if (typeof collided !== "boolean") {
-                    if (isColor(collided, 255, 201, 14)) {
-
-                    } else if (isColor(collided, 255, 255, 255)) {
-                        // console.log("T MORT (WHITE) !", collided);
-
-                    } else if (isColor(collided, 127, 127, 127)) {
-                        gravity = -2.0;
-                        myPlayer.velX = 0;
-                        myPlayer.velY = gravity;
-                        myPlayer.dead = true;
-
-                    } else if (isColor(collided, 255, 127, 39) || isColor(collided, 245, 128, 50)) {
-                        console.log("BOOM SWITCH !");
-                        gravity *= -1;
-
-                    } else if (isColor(collided, 34, 177, 76)) {
-                        levelIdx++;
-                        respawnPlayer();
-
-                    } else {
-                        console.log(collided);
-                    }
+                if (myRealY < collided.y) {
+                    console.log("IS ON GROUND (2).");
+                    myPlayer.y      = ((collided.y - 1) * CellSize);
+                    myPlayer.velY   = 0;
+                    isOnGround      = true;
+                    continue;
                 }
             }
+
+            gravity         = -2.0;
+            myPlayer.velX   = 0;
+            myPlayer.velY   = 0;
+            myPlayer.dead   = true;
         }
 
-        myPlayer.velY += gravity;
+        myPlayer.x      += myPlayer.velX;
+        myPlayer.y      += myPlayer.velY;
+        myPlayer.velY   += gravity;
 
         if (!myPlayer.dead) {
-            if (inputs.has(" ") && typeof collided !== "boolean") {
+            if (inputs.has(" ") && isOnGround) {
                 myPlayer.velY = 20;
                 myPlayer.velY *= (gravity < 0)
-                    ?  1
-                    : -1;
+                    ? ( 1)
+                    : (-1);
             }
         }
-
-        if (inputs.has("Escape"))
-            respawnPlayer();
     }
 
     return {
